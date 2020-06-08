@@ -3,6 +3,6 @@ This is a short implementation in Julia of the PEER Ground Motion Database Web A
 The app is an extension of the PEER procedure for user-defined databases. 
 
 ## Authors:
-- Diego Casas, Research Assistant at Universidad del Norte
+- Diego Casas, Independent Researcher
 - Alexander Arciniegas, M.S. student at Universidad del Norte
 - Gustavo Araujo, Ph.D student at Oregon State University
