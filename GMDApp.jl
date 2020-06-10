@@ -172,10 +172,37 @@ end
 
 records, T = read_records("test/NGA-Sub_Intraslab.csv")
 
+n = length(T)
+
 criteria = read_filters("test/filter")
 filter!(criteria, records)
+
+nrec = length(records)
 
 T_target, S_target = read_target_spectrum("test/example_spectra.csv")
 S_target = loginterp(T, T_target, S_target)
 
+T_w = [0.01, 1, 10, 20]
+w = [1, 1, 1, 1]
+w = loginterp(T, T_w, w)
+w ./= sum(w)
+
+f = Vector{Float64}(undef, nrec)
+e² = Vector{Float64}(undef, nrec)
+for (i, rec) in enumerate(records)
+    f[i] = exp(sum(w .* log.(S_target ./ rec.S)))
+    e²[i] = sum(w .* log.(S_target ./ (f[i] .* rec.S)).^2)
+end
+
+using Plots
+
+k = 20
+ibest = partialsortperm(e², 1:k)
+plt = plot(T, S_target, xaxis = :log, yaxis = :log, legend = false)
+for i in ibest
+    rec = records[i]
+    println("RSN = $(rec.RSN), e² = $(e²[i])")
+    plot!(plt, T, f[i] * rec.S, color = "gray")
+end
+plot!(plt, T, S_target, color = "red", linewidth = 5)
 # end
