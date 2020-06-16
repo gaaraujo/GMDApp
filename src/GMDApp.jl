@@ -3,7 +3,7 @@ module GMDApp
 import Base: parse, getindex
 using DelimitedFiles: readdlm
 
-# using Plots
+using Gaston
 
 using Statistics
 
@@ -21,8 +21,7 @@ Introduce the name of your input file: "
 const WELCOME_MESSAGE = "
 GMDApp -- Ground Motion Database Search Application
 Version 0.1.0 64-Bit
-Copyright (c) 2020 Diego A. Casas Toro, Gustavo A. Araujo Rodriguez 
-and Alexander M. Arciniegas Aguilera.
+Copyright (c) 2020 Diego Casas, Gustavo Araujo, and Alexander Arciniegas.
 MIT License.
 This is a short implementation in Julia of the PEER Ground Motion Database 
 Web Application Algorithm for Time Series Selection.
@@ -276,26 +275,27 @@ function read_input()
 end
 
 
-# function genplot(T, S_target, T_target, S_best, S_mean, S_mean_plus_std, S_mean_minus_std)
-#     n = length(T)
-#     nrec = size(S_best)[2]
-#     plt = plot(
-#         T,
-#         S_target,
-#         xaxis = :log,
-#         yaxis = :log,
-#         legend = false,
-#         xlim = (T_target[1], T_target[end]),
-#     )
-#     for i = 1:nrec
-#         plot!(plt, T, S_best[:, i], c = "gray")
-#     end
-#     plot!(plt, T, S_mean, c = "black", lw = 3)
-#     plot!(plt, T, S_mean_plus_std, c = "black", lw = 3, s = :dot)
-#     plot!(plt, T, S_mean_minus_std, c = "black", lw = 3, s = :dot)
-#     plot!(plt, T, S_target, c = "red", lw = 3)
-#     plt
-# end
+function genplot(T, S_target, T_target, S_best, S_mean, S_mean_plus_std, S_mean_minus_std)
+    n = length(T)
+    nrec = size(S_best)[2]
+    plt = plot(T, S_best[:, 1], w = "l", legend =  "''", lw = 2, lc = :gray,
+        Axes(grid = :on,
+          key = "left",
+          axis = "loglog",
+          xrange = (T_target[1], T_target[end]),
+          xlabel = "'T [s]'",
+          ylabel = "'Sa [g]'",
+          )
+    )
+    for i = 1:nrec
+        plot!(T, S_best[:, i], w = "l", legend =  "''", lw = 2, lc = :gray)
+    end
+    plot!(T, S_target, w = "l", legend = "'Target'",  lw = 2, lc = :red)
+    plot!(T, S_mean, w = "l", legend = "'Mean'",  lw = 2, lc = :black)
+    plot!(T, S_mean_plus_std, w = "l", legend = "'Mean+Std'",  dt = 2, lw = 2, lc = :black)
+    plot!(T, S_mean_minus_std,  w = "l", legend = "'Mean-Std'",  dt = 2, lw = 2, lc = :black)
+    plt
+end
 
 
 function write_criteria(io, filterfile, T_w, w_orig)
@@ -435,22 +435,25 @@ function main()
 
     f = Vector{Float64}(undef, nrec)
     e² = Vector{Float64}(undef, nrec)
-    for (i, rec) in enumerate(records)
-        f[i] = exp(sum(w .* log.(S_target ./ rec.S)))
-        e²[i] = sum(w .* log.(S_target ./ (f[i] .* rec.S)) .^ 2)
-    end
-
-    k = postfilters["Nmax"]
+    fmin = 0
+    fmax = 9999
     ScaleFactor = postfilters["ScaleFactor"]
     if !isnothing(ScaleFactor)
         fmin = first(ScaleFactor)
         fmax = last(ScaleFactor)
-        ifactor = fmin .≤ f .≤ fmax
-        # apply filter by ScaleFactor
-        records = records[ifactor]
-        f = f[ifactor]
-        e² = e²[ifactor]
     end
+    for (i, rec) in enumerate(records)
+        fi = exp(sum(w .* log.(S_target ./ rec.S)))
+        if fi < fmin
+            fi = fmin
+        end
+        fi < fmin && (fi = fmin)
+        fi > fmax && (fi = fmax)
+        f[i] = fi
+        e²[i] = sum(w .* log.(S_target ./ (f[i] .* rec.S)) .^ 2)
+    end
+
+    k = postfilters["Nmax"]
 
     nrec = length(records)
     if nrec == 0
@@ -477,7 +480,7 @@ function main()
     end
     S_mean_plus_std = S_mean .* S_std
     S_mean_minus_std = S_mean ./ S_std
-    # plt = genplot(T, S_target, T_target, S_best, S_mean, S_mean_plus_std, S_mean_minus_std)
+    plt = genplot(T, S_target, T_target, S_best, S_mean, S_mean_plus_std, S_mean_minus_std)
 
     open(files["output"], "w") do io
         write_criteria(io, files["filters"], T_w, w_orig)
@@ -497,7 +500,9 @@ function main()
         println(io)
         write_unscaled_spectra(io, records[ibest], T)
     end
-    # plt
+    display(plt)
+    println("Press Enter to exit...")
+    readline(stdin)
 end
 
 
