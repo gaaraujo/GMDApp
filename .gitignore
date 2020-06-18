@@ -28,3 +28,4 @@ test/
 input.txt
 output.csv
 runGMDApp.jl
+test_G/

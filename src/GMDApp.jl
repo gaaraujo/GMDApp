@@ -30,7 +30,10 @@ The app is an extension of the PEER procedure for user-defined databases.
 struct Record
     RSN::Int64
     EQID::Int64
+    EQName::String
+    Year::Int64
     SSN::Int64
+    SName::String
     FaultType::Int64
     Magnitude::Float64
     Rjb::Float64
@@ -47,7 +50,10 @@ struct Record
     function Record(;
         RSN,
         EQID,
+        EQName,
+        Year,
         SSN,
+        SName,
         FaultType,
         Magnitude,
         Rjb,
@@ -65,7 +71,10 @@ struct Record
         new(
             RSN,
             EQID,
+            EQName,
+            Year,
             SSN,
+            SName,
             FaultType,
             Magnitude,
             Rjb,
@@ -136,7 +145,10 @@ function read_records(filename)
             records[i] = Record(
                 RSN = parse(Int64, row[fields["RSN"]]),
                 EQID = parse(Int64, row[fields["EQID"]]),
+                EQName = row[fields["Earthquake Name"]],
+                Year = parse(Int64, row[fields["Year"]]),
                 SSN = parse(Int64, row[fields["SSN"]]),
+                SName = row[fields["Station Name"]],
                 FaultType = parse(Int64, row[fields["FaultType"]]),
                 Magnitude = parse(Float64, row[fields["Magnitude"]]),
                 Rjb = parse(Float64, row[fields["Rjb"]]),
@@ -324,12 +336,12 @@ function write_summary(io, records, e², f)
     if io == stdout
         println(
             io,
-            "ID, RSN, MSE, ScaleFactor, Dur, Magnitude, FaultType, Rjb, ClstD, Vs30",
+            "ID, RSN, EQID, MSE, ScaleFactor, Dur, Magnitude, FaultType, Rjb, ClstD, Vs30",
         )
         for j in 1:length(records)
             rec = records[j]
             println(
-                io, j, ", " ,rec.RSN, ", ", round(e²[j], sigdigits = 4), ", ", 
+                io, j, ", " ,rec.RSN, ", ", rec.EQID, ", ", round(e²[j], sigdigits = 4), ", ", 
                 round(f[j], sigdigits = 2), ", ", rec.Dur, ", ",  rec.Magnitude,
                 ", ", rec.FaultType, ", ", rec.Rjb, ", ", rec.ClstD, ", ", 
                 rec.Vs30,
@@ -338,12 +350,13 @@ function write_summary(io, records, e², f)
     else
         println(
             io,
-            "ID,RSN,MSE,ScaleFactor,Dur,Magnitude,FaultType,Rjb,ClstD,Vs30,FileNameHorizontal1,FileNameHorizontal2,FileNameVertical",
+            "ID,RSN,MSE,ScaleFactor,Dur,Earthquake Name,Year,Station Name,Magnitude,FaultType,Rjb,ClstD,Vs30,FileNameHorizontal1,FileNameHorizontal2,FileNameVertical",
         )
         for j in 1:length(records)
             rec = records[j]
             println(
-                io, j, "," ,rec.RSN, ",", e²[j], ",", f[j], ",", rec.Dur, ",", 
+                io, j, "," ,rec.RSN, ",", e²[j], ",", f[j], ",", rec.Dur, ",",
+                rec.EQName, ",", rec.Year, ",", rec.SName, ",",
                 rec.Magnitude, ",", rec.FaultType, ",", rec.Rjb, ",", 
                 rec.ClstD, ",", rec.Vs30, ",", rec.FileNameHorizontal1, ",", 
                 rec.FileNameHorizontal2, ",", rec.FileNameVertical,
