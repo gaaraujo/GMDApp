@@ -36,9 +36,9 @@ version = "0.8.1"
 
 [[Gaston]]
 deps = ["ColorSchemes", "DelimitedFiles", "Random"]
-git-tree-sha1 = "b872abeb6ecf151c2d5b0930ca091e6eef26e329"
+git-tree-sha1 = "fbe39d38c5de5ce0be17c08c11797db8fa2a74df"
 uuid = "4b11ee91-296f-5714-9832-002c20994614"
-version = "1.0.0"
+version = "1.0.2"
 
 [[InteractiveUtils]]
 deps = ["Markdown"]
