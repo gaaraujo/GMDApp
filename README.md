@@ -7,4 +7,4 @@ Compiled binaries can be found [here](https://github.com/gaaraujo/GMDApp/release
 ## Authors:
 - Diego Casas, Independent Researcher
 - Gustavo Araujo, Ph.D student at Oregon State University
-- Alexander Arciniegas, M.S. student at Universidad del Norte
+- Alexander Arciniegas, M.S.
