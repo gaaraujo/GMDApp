@@ -1,7 +1,7 @@
 name = "GMDApp"
 uuid = "eed44e88-f9e2-4b77-98fb-ead4d2aafabb"
-authors = ["Diego Casas <dacasas@uninorte.edu.co>", "Gustavo Araujo <araujorg@oregonstate.edu>", "Alexander Arciniegas <amarciniegas@uninorte.edu.co>"]
-version = "0.1.0"
+authors = ["Diego Casas <diego.casas@ufpr.br>", "Gustavo Araujo <araujorg@oregonstate.edu>", "Alexander Arciniegas <amarciniegas@uninorte.edu.co>"]
+version = "0.2.0"
 
 [deps]
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"

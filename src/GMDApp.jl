@@ -7,7 +7,6 @@ using Gaston
 
 using Statistics
 
-const NMAX = 100
 const DEFAULT_INPUT = "input.txt"
 const WARNING_INPUT_1 =  "
 WARNING: $(DEFAULT_INPUT) found in the GMDApp home directory.
@@ -20,8 +19,8 @@ WARNING: $(DEFAULT_INPUT) not found in the GMDApp home directory.
 Introduce the name of your input file: "
 const WELCOME_MESSAGE = "
 GMDApp -- Ground Motion Database Search Application
-Version 0.1.0 64-Bit
-Copyright (c) 2020 Diego Casas, Gustavo Araujo, and Alexander Arciniegas.
+Version 0.2.0 64-Bit
+Copyright (c) 2022 Diego Casas, Gustavo Araujo, and Alexander Arciniegas.
 MIT License.
 This is a short implementation in Julia of the PEER Ground Motion Database 
 Web Application Algorithm for Time Series Selection.
@@ -129,19 +128,18 @@ end
 
 Returns a vector of Record instances read from the given file.
 Also returns the periods vector for the spectra in the records.
-
-TO DO: Deal with trailing commas.
 """
 function read_records(filename)
     open(filename) do io
         nrec = countlines(io) - 3
         seekstart(io)
         readline(io) # title
-        T = parse.(Float64, split(readline(io), ','))
+        T = parse.(Float64, filter((~) ∘ isempty, split(readline(io), ',')))
         fields = read_header(readline(io), length(T))
         records = Vector{Record}(undef, nrec)
-        for (i, line) in enumerate(eachline(io))
-            row = split(line, ',')
+		for (i, row) in enumerate(eachrow(readdlm(io, ',', String)))
+        # for (i, line) in enumerate(eachline(io))
+            # row = split(line, ',')
             records[i] = Record(
                 RSN = parse(Int64, row[fields["RSN"]]),
                 EQID = parse(Int64, row[fields["EQID"]]),
@@ -184,7 +182,7 @@ function read_filters(filename)
         for line in eachline(io)
             k, v = split(line)
             if k == "Nmax"
-                Nmax = v == "NA" ? NMAX : min(parse(Int64, v), NMAX)
+                Nmax = parse(Int64, v)
                 push!(postfilters, "Nmax" => Nmax)
                 continue
             end
@@ -225,11 +223,11 @@ and arrays for the application for weights (T_w, w).
 function read_target_spectrum(filename)
     open(filename) do io
         readline(io) # title
-        T_w = parse.(Float64, split(readline(io), ','))
-        w = parse.(Float64, split(readline(io), ','))
-        data = readdlm(io, ',', Float64, skipstart = 1)
-        T = data[:, 1]
-        S = data[:, 2]
+        T_w = parse.(Float64, filter((~) ∘ isempty, split(readline(io), ',')))
+        w = parse.(Float64, filter((~) ∘ isempty, split(readline(io), ',')))
+        data = readdlm(io, ',', String, skipstart = 1)
+        T = parse.(Float64, data[:, 1])
+        S = parse.(Float64, data[:, 2])
         T, S, T_w, w
     end
 end
@@ -519,7 +517,7 @@ function main()
 end
 
 
-function julia_main()
+function julia_main()::Cint
     try
         main()
     catch
