@@ -8,3 +8,6 @@ Compiled binaries can be found [here](https://github.com/gaaraujo/GMDApp/release
 - Diego Casas, Independent Researcher
 - Gustavo Araujo, Ph.D student at Oregon State University
 - Alexander Arciniegas, M.S.
+
+## Notes:
+This app uses the Gaston.jl module to plot, which requires gnuplot 5.2.8. If gnuplot is not installed, GMDApp will still work but will not show any plots. Make sure to install gnuplot and enable *ADD TO PATH*. 
